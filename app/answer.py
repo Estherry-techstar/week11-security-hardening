@@ -27,7 +27,6 @@ def _client():
         api_key=settings.openai_api_key,
         base_url=settings.openai_base_url,          # <-- points SDK at OpenRouter
         default_headers={
-            # OpenRouter asks apps to identify themselves; harmless if unused.
             "HTTP-Referer": "http://localhost:8000",
             "X-Title": "Week9 RAG Retriever",
         },
@@ -50,7 +49,6 @@ def ask(question: str, n_sources: int | None = None) -> dict:
     top_k = n_sources or settings.answer_top_k
     hits = hybrid_search(question, n_results=top_k)
 
-    # Refuse before spending a token if retrieval found nothing usable.
     if not hits:
         return {
             "question": question,

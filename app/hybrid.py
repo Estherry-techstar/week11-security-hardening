@@ -16,17 +16,7 @@ def hybrid_search(
     candidates: int = 20,
     use_rerank: bool = True,
 ) -> list[dict]:
-    """Fuse vector and keyword results, then optionally rerank.
-
-    Reciprocal Rank Fusion scores by rank position rather than raw score,
-    because the two scales are not comparable (cosine similarity ~0-1 vs
-    unbounded BM25). A chunk both retrievers rank highly beats one that
-    only a single retriever favours.
-
-    The cross-encoder then rescores the fused candidates by reading each
-    (query, chunk) pair together — accurate, but too slow to run over the
-    whole store, hence retrieve-then-rerank.
-    """
+    """Fuse vector and keyword results, then optionally rerank."""
     vector_hits = vector_search(query, candidates)
     keyword_hits = keyword_search(query, candidates)
 

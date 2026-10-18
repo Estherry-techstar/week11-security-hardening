@@ -71,12 +71,7 @@ def _split_sentences(text: str) -> list[str]:
 
 
 def _split_units(text: str, max_tokens: int) -> list[str]:
-    """Break text into units no larger than max_tokens.
-
-    Paragraphs first. A paragraph that is still too large is split into
-    sentences, and a sentence that is still too large is cut by tokens
-    as a last resort.
-    """
+    """Break text into units no larger than max_tokens."""
     units: list[str] = []
 
     for para in re.split(r"\n\s*\n", text):
@@ -99,11 +94,7 @@ def _split_units(text: str, max_tokens: int) -> list[str]:
 
 
 def _pack_page(page: dict, size: int) -> list[dict]:
-    """Pack one page's units into chunks no larger than `size` tokens.
-
-    Handling a single page per call keeps the page number bound to this
-    call's arguments, rather than to a loop variable in an enclosing scope.
-    """
+    """Pack one page's units into chunks no larger than `size` tokens."""
     chunks: list[dict] = []
     buffer: list[str] = []
     buffer_tokens = 0
@@ -138,8 +129,7 @@ def structure_aware_chunks(
     pages: list[dict],
     chunk_tokens: int | None = None,
 ) -> list[dict]:
-    """Pack whole paragraphs/sentences up to the target size, never cutting
-    through the middle of one."""
+    """Pack whole paragraphs/sentences up to the target size."""
     size = chunk_tokens or settings.chunk_tokens
 
     chunks: list[dict] = []

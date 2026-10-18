@@ -13,11 +13,7 @@ def _tokenize(text: str) -> list[str]:
 
 @lru_cache(maxsize=1)
 def _index() -> tuple[BM25Okapi, list[dict]]:
-    """Build a BM25 index over every stored chunk.
-
-    Cached, because rebuilding per query would be wasteful. Call
-    reset_index() after indexing new documents.
-    """
+    """Build a BM25 index over every stored chunk."""
     chunks = get_all_chunks()
     if not chunks:
         raise RuntimeError("No chunks in the store. Index a document first.")

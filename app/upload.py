@@ -13,8 +13,7 @@ TEXT_EXTS = {".txt", ".md"}
 
 
 def _detect_type(head: bytes, filename: str) -> str:
-    """Identify the file from its content. Plain text has no signature,
-    so fall back to the extension only for .txt and .md."""
+    """Identify the file from its content."""
     kind = filetype.guess(head)
     if kind and kind.extension == "pdf":
         return "pdf"

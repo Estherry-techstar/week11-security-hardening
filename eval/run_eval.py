@@ -1,12 +1,5 @@
-"""Precision@5 evaluation runner for the Week 9 RAG retriever.
+"""Precision@5 evaluation runner for the Week 9 RAG retriever."""
 
-Loads eval/labelled.json, runs hybrid_search for each labelled question,
-computes precision@5 against the ground-truth pages, and writes
-eval/results.json.
-
-Run from the project root:
-    python -m eval.run_eval
-"""
 from __future__ import annotations
 
 import json
@@ -26,11 +19,6 @@ RESULTS_PATH = EVAL_DIR / "results.json"
 
 
 def precision_at_k(hits: list[dict], relevant_pages: list[int], k: int = K) -> float:
-    """Precision@k = (# relevant in top-k) / k.
-
-    Denominator is always k, matching README.md — even if retrieval returns
-    fewer than k results.
-    """
     relevant_set = {int(p) for p in relevant_pages}
     top_k = hits[:k]
     relevant = sum(1 for h in top_k if int(h.get("page", -1)) in relevant_set)

@@ -1,31 +1,32 @@
 from functools import lru_cache
+from sentence_transformers import CrossEncoder
 
-CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-
+# A fast, standard cross-encoder model for reranking search results
+DEFAULT_RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 @lru_cache(maxsize=1)
-def _model():
-    """Load the cross-encoder once. Downloads ~80 MB on first use."""
-    from sentence_transformers import CrossEncoder
+def _cross_encoder():
+    """Load the cross-encoder model once and cache it."""
+    return CrossEncoder(DEFAULT_RERANK_MODEL)
 
-    return CrossEncoder(CROSS_ENCODER_MODEL)
-
-
-def rerank(query: str, hits: list[dict], top_n: int = 5) -> list[dict]:
-    """Rescore candidates by reading each (query, chunk) pair together.
-
-    Embedding similarity compares two independently computed vectors, so
-    the model never sees the query and chunk at the same time. A
-    cross-encoder does, and can judge whether the chunk actually answers
-    the question rather than merely sitting in the same topic area.
-    """
-    if not hits:
+def rerank(query: str, candidates: list[dict], n_results: int = 5) -> list[dict]:
+    """Rescore candidates using a cross-encoder and return the top n."""
+    if not candidates:
         return []
 
-    pairs = [(query, hit["text"]) for hit in hits]
-    scores = _model().predict(pairs)
+    model = _cross_encoder()
+    
+    # Create pairs of (query, chunk_text) to score
+    pairs = [(query, c["text"]) for c in candidates]
+    
+    # Predict relevance scores
+    scores = model.predict(pairs)
 
-    for hit, score in zip(hits, scores):
-        hit["rerank_score"] = round(float(score), 4)
+    # Attach scores to the candidate dictionaries
+    for candidate, score in zip(candidates, scores):
+        candidate["rerank_score"] = float(score)
 
-    return sorted(hits, key=lambda h: h["rerank_score"], reverse=True)[:top_n]
+    # Sort by the new score in descending order and return the top results
+    ranked = sorted(candidates, key=lambda x: x["rerank_score"], reverse=True)
+    
+    return ranked[:n_results]

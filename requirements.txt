@@ -9,3 +9,6 @@ tiktoken
 openai
 sentence-transformers
 rank-bm25
+azure-identity
+azure-keyvault-secrets
+azure-monitor-opentelemetry

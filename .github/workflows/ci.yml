@@ -1,4 +1,4 @@
-name: Week 9 tests
+name: Week 11 Security Tests
 
 on:
   push:
@@ -9,6 +9,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    # We add dummy environment variables so the app doesn't crash during CI
+    env:
+      APP_INSIGHTS_CONNECTION_STRING: "InstrumentationKey=00000000-0000-0000-0000-000000000000"
+      # Dummy Azure credentials force DefaultAzureCredential to fail fast
+      AZURE_TENANT_ID: "dummy-tenant"
+      AZURE_CLIENT_ID: "dummy-client"
+      AZURE_CLIENT_SECRET: "dummy-secret"
 
     steps:
       - name: Checkout
@@ -29,12 +37,13 @@ jobs:
       - name: Lint with ruff
         run: ruff check app tests
 
-      - name: Verify Week 9 modules import
+      - name: Verify Week 11 modules import
         run: |
           python -c "from app.hybrid import hybrid_search; print('hybrid OK')"
           python -c "from app.answer import ask; print('answer OK')"
           python -c "from app.keyword import keyword_search; print('keyword OK')"
-          python -c "from app.rerank import rerank; print('rerank OK')" || true
+          python -c "from app.rerank import rerank; print('rerank OK')"
+          python -c "from app.extract import extract_pages; print('extract OK')"
 
       - name: Run tests
         run: pytest -v

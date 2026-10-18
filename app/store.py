@@ -69,8 +69,6 @@ def index_chunks(chunks: list[dict], doc_id: str, source: str) -> dict:
         ids=ids, documents=texts, embeddings=embeddings, metadatas=metadatas
     )
 
-    # New chunks invalidate the BM25 index. Imported here, not at module
-    # level, because app.keyword imports from this module.
     from app.keyword import reset_index
 
     reset_index()

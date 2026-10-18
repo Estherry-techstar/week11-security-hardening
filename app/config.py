@@ -1,5 +1,7 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
 
 class Settings(BaseSettings):
     """App settings. Any value can be overridden in a .env file."""
@@ -26,13 +28,25 @@ class Settings(BaseSettings):
     collection_name: str = "documents"
 
     # --- LLM / generation (week 9) ---
-    # Kept the name `openai_api_key` so nothing else in the codebase breaks,
-    # but it now holds your OpenRouter key (sk-or-v1-...).
     openai_api_key: str | None = None
     openai_base_url: str = "https://openrouter.ai/api/v1"
     chat_model: str = "meta-llama/llama-3.3-70b-instruct:free"
     answer_top_k: int = 5
-    min_rerank_score: float = 0.0   # below this, refuse rather than answer
+    min_rerank_score: float = 0.0
 
-
+# Initialize settings (this loads non-secret stuff from .env)
 settings = Settings()
+
+# Securely fetch the API key from Key Vault
+KEY_VAULT_URI = "https://kv-week11-estherry.vault.azure.net/"
+
+try:
+    credential = DefaultAzureCredential()
+    secret_client = SecretClient(vault_url=KEY_VAULT_URI, credential=credential)
+    
+    # Fetch the secret and override the settings object
+    settings.openai_api_key = secret_client.get_secret("OpenAI-API-Key").value
+    print("✅ Successfully loaded OpenAI API Key from Azure Key Vault.")
+except Exception as e:
+    print(f"❌ Failed to load secret from Key Vault: {e}")
+    print("Falling back to .env file if available...")

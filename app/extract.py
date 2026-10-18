@@ -15,11 +15,7 @@ def _find_file(doc_id: str) -> Path:
 
 
 def extract_pages(doc_id: str) -> list[dict]:
-    """Return [{'page': 1, 'text': '...'}, ...] for a stored document.
-
-    PDFs keep real page numbers. Text and markdown files have no pages,
-    so they are reported as a single page 1.
-    """
+    """Return [{'page': 1, 'text': '...'}, ...] for a stored document."""
     path = _find_file(doc_id)
 
     if path.suffix.lower() == ".pdf":

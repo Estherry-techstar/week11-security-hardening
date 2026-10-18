@@ -1,4 +1,9 @@
+import os
+from dotenv import load_dotenv
+from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.answer import ask
 from app.chunking import fixed_size_chunks, structure_aware_chunks
@@ -8,8 +13,29 @@ from app.keyword import keyword_search
 from app.store import index_chunks, search
 from app.upload import router as upload_router
 
+# 1. Load local environment variables (.env)
+load_dotenv()
+
+# 2. Configure Azure App Insights
+conn_str = os.getenv("APP_INSIGHTS_CONNECTION_STRING")
+if conn_str:
+    configure_azure_monitor(connection_string=conn_str)
+    print("✅ Application Insights configured.")
+else:
+    print("⚠️ No App Insights connection string found in .env")
+
+# 3. Initialize FastAPI
 app = FastAPI(title="Week 9 – RAG Retrieval & Citations")
 app.include_router(upload_router)
+
+# ─── Frontend (single-page UI served from /static/index.html) ───
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def home():
+    """Serve the frontend UI at the root URL."""
+    return FileResponse("static/index.html")
 
 
 def _chunk_with(strategy: str, pages: list[dict]) -> list[dict]:
