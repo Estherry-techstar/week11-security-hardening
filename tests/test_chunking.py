@@ -63,8 +63,9 @@ def test_chunk_indexes_are_sequential():
 
 
 def test_unknown_strategy_rejected():
-    from main import app
     from fastapi.testclient import TestClient
+
+    from main import app
 
     r = TestClient(app).get("/documents/nonexistent/chunks?strategy=nope")
     assert r.status_code in (400, 404)
