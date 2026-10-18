@@ -1,4 +1,5 @@
 from functools import lru_cache
+
 from sentence_transformers import CrossEncoder
 
 # A fast, standard cross-encoder model for reranking search results
