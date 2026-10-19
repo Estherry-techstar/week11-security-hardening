@@ -1,4 +1,5 @@
 import os
+
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from pydantic_settings import BaseSettings, SettingsConfigDict
