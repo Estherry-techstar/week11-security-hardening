@@ -49,5 +49,6 @@ try:
     settings.openai_api_key = secret_client.get_secret("OpenAI-API-Key").value
     print("✅ Successfully loaded OpenAI API Key from Azure Key Vault.")
 except Exception as e:  # noqa: BLE001
-    print(f"❌ Failed to load secret from Key Vault: {e}")
-    print("Falling back to .env file if available...")
+    # REMOVED the fallback. The app should fail securely if Key Vault is unreachable.
+    print(f"❌ CRITICAL: Failed to load secret from Key Vault: {e}")
+    raise RuntimeError("Application cannot start without Key Vault access.") from e
