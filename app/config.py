@@ -1,3 +1,4 @@
+import os
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -19,7 +20,7 @@ class Settings(BaseSettings):
     tokenizer_encoding: str = "cl100k_base"
 
     # --- Embeddings (step 6) ---
-    embedding_provider: str = "local"                     # "local" or "openai"
+    embedding_provider: str = "local"
     local_embedding_model: str = "all-MiniLM-L6-v2"
     openai_embedding_model: str = "text-embedding-3-small"
 
@@ -41,14 +42,19 @@ settings = Settings()
 # Securely fetch the API key from Key Vault
 KEY_VAULT_URI = "https://kv-week11-estherry.vault.azure.net/"
 
-try:
-    credential = DefaultAzureCredential()
-    secret_client = SecretClient(vault_url=KEY_VAULT_URI, credential=credential)
-    
-    # Fetch the secret and override the settings object
-    settings.openai_api_key = secret_client.get_secret("OpenAI-API-Key").value
-    print("✅ Successfully loaded OpenAI API Key from Azure Key Vault.")
-except Exception as e:
-    # REMOVED the fallback. The app should fail securely if Key Vault is unreachable.
-    print(f"❌ CRITICAL: Failed to load secret from Key Vault: {e}")
-    raise RuntimeError("Application cannot start without Key Vault access.") from e
+# If running in a CI/CD environment, skip Key Vault to allow tests to run
+if os.getenv("CI"):
+    print("⚠️ CI environment detected. Using dummy key and skipping Key Vault.")
+    settings.openai_api_key = "dummy-key-for-ci"
+else:
+    try:
+        credential = DefaultAzureCredential()
+        secret_client = SecretClient(vault_url=KEY_VAULT_URI, credential=credential)
+        
+        # Fetch the secret and override the settings object
+        settings.openai_api_key = secret_client.get_secret("OpenAI-API-Key").value
+        print("✅ Successfully loaded OpenAI API Key from Azure Key Vault.")
+    except Exception as e:
+        # REMOVED the fallback. The app should fail securely if Key Vault is unreachable.
+        print(f"❌ CRITICAL: Failed to load secret from Key Vault: {e}")
+        raise RuntimeError("Application cannot start without Key Vault access.") from e

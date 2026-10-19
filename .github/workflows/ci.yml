@@ -12,6 +12,7 @@ jobs:
     
     # We add dummy environment variables so the app doesn't crash during CI
     env:
+      CI: "true"  # <-- THIS IS THE CRITICAL FIX
       APP_INSIGHTS_CONNECTION_STRING: "InstrumentationKey=00000000-0000-0000-0000-000000000000"
       # Dummy Azure credentials force DefaultAzureCredential to fail fast
       AZURE_TENANT_ID: "dummy-tenant"
